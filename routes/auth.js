@@ -33,8 +33,9 @@ router.post('/creatuser',[
       return res.status(400).json({ error: "Sorry a user with this email already exists" })
     } 
     const salt = await bcrypt.genSalt(10);
-    const secPass = await bcrypt.hash(req.body.password, salt);
+    var secPass = await bcrypt.hash(req.body.password, salt);
 
+    
     user= await User.create({
         Firstname: req.body.Firstname,
         Lastname: req.body.Lastname,
@@ -74,7 +75,7 @@ router.post('/login', [
       return res.status(400).json({ errors: errors.array() });
     }
   
-    const {email, password} = req.body;
+    const {email, password,role} = req.body;
     try {
       let user = await User.findOne({email});
       if(!user){
@@ -85,6 +86,7 @@ router.post('/login', [
       if(!passwordCompare){
         return res.status(400).json({error: "Please try to login with correct credentials"});
       }
+      
   
       const data = {
         user:{
@@ -93,6 +95,12 @@ router.post('/login', [
       }
       const authtoken = jwt.sign(data, JWT_SECRET);
       res.json({authtoken})
+
+      if(role==='admin'){
+          //redirect to  -- /auth/api/getalluser
+      }else{
+          //redirect to -- /auth/api/getuser
+      }
   
     } catch (error) {
       console.error(error.message);
@@ -101,13 +109,28 @@ router.post('/login', [
   
   
   })
-// ROUTE 3: Get loggedin User Details using: POST "/api/auth/getuser". Login required
-router.post('/getuser', fetchuser,async (req, res) => {
+// ROUTE 3: Get loggedin User Details using: POST "/api/auth/getalluser". Login required
+router.post('/getalluser', fetchuser,async (req, res) => {
+
 
     try {
-      userId = req.user.id;
+     
       
-      const user = await User.findById(userId).select("-password")
+      const user = await User.find().select("-password")
+      res.send(user)
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send("Internal Server Error");
+    }
+  })
+
+  // ROUTE 3: Get loggedin User Details using: POST "/api/auth/getalluser". Login required
+router.post('/getuser', fetchuser,async (req, res) => {
+
+
+    try {
+        userId = req.user.id;
+        const user = await User.findById(userId).select("-password")
       res.send(user)
     } catch (error) {
       console.error(error.message);
@@ -115,11 +138,13 @@ router.post('/getuser', fetchuser,async (req, res) => {
     }
   })
   
+  
 
-  // ROUTE 3: Update an existing Note using: PUT "/api/notes/updatenote". Login required
+  // ROUTE 3: Update an existing user using: PUT "/api/auth/updateuser". Login required
 router.put('/updateuser/:id', fetchuser, async (req, res) => {
 
     const { Firstname,Middlename,Lastname,email,role,department } = req.body;
+
     try {
         // Create a newUser object
         const newUser = {};

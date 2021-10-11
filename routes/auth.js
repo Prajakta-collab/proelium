@@ -134,8 +134,8 @@ router.put('/updateuser/:id', fetchuser, async (req, res) => {
 
         
         
-        // Find the note to be updated and update it
-        let user = await User.findById(req.user.id)
+        // Find the user to be updated and update it
+        var user = await User.findById(req.user.id).select("-password")
         if (!user) { return res.status(404).send("Not Found") }
 
       
@@ -143,7 +143,8 @@ router.put('/updateuser/:id', fetchuser, async (req, res) => {
         if (user.id.toString() !== req.user.id) {
             return res.status(401).send("Not Allowed");
         }
-        user = await User.findByIdAndUpdate(req.params.id, { $set: newUser }, { new: true })
+        user = await User.findByIdAndUpdate(req.params.id, { $set:{Firstname:req.body.Firstnamt ,Lastname:req.body.Lastname,Middlename:req.body.Middlename,email:req.body.email,role:req.body.role,department:req.body.department}}, { new: true })
+       
         res.json({ user });
     } catch (error) {
         console.error(error.message);

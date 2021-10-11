@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const UserAdminSchema = new Schema({
+const UserSchema  = new Schema({
     Firstname:{
         type: String,
         required: true
@@ -19,6 +19,7 @@ const UserAdminSchema = new Schema({
         required: true,
         unique: true
     },
+    
     password:{
         type: String,
         required: true
@@ -34,4 +35,6 @@ const UserAdminSchema = new Schema({
   }     ,{timestamps: true }
 );
 
-  module.exports = mongoose.model('useradmin', UserAdminSchema);
+const User = mongoose.model('user', UserSchema);
+  User.createIndexes();
+  module.exports = User;

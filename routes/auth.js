@@ -20,7 +20,7 @@ const JWT_SECRET = 'P@rajL@ves$u$h';
 router.post('/creatuser',[
     
     body('email', 'Enter a valid email').isEmail(),
-    body('password', 'Password must be atleast 5 characters').isLength({ min: 6, max:12 }),
+    body('password', 'Password must be 6 to 12 characters').isLength({ min: 6, max:12 }),
 ] , async(req, res)=>{ 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -118,13 +118,14 @@ router.post('/getuser', fetchuser,async (req, res) => {
 
   // ROUTE 3: Update an existing Note using: PUT "/api/notes/updatenote". Login required
 router.put('/updateuser/:id', fetchuser, async (req, res) => {
+
     const { Firstname,Middlename,Lastname,email,role,department } = req.body;
     try {
-        // Create a newNote object
+        // Create a newUser object
         const newUser = {};
-        if (FirstName) { newUser.FirstName = FirstName };
-        if (MiddleName) { newUser.MiddleName = MiddleName };
-        if (LastName) { newUser.LastName = LastName };
+        if (Firstname) { newUser.Firstname = Firstname };
+        if (Middlename) { newUser.Middlename = Middlename };
+        if (Lastname) { newUser.Lastname = Lastname };
         if (email) { newUser.email = email };
         if (role) { newUser.role = role };
         if (department) { newUser.department = department };
@@ -137,11 +138,13 @@ router.put('/updateuser/:id', fetchuser, async (req, res) => {
         let user = await User.findById(req.user.id)
         if (!user) { return res.status(404).send("Not Found") }
 
-        if (user.toString() !== req.user.id) {
+      
+
+        if (user.id.toString() !== req.user.id) {
             return res.status(401).send("Not Allowed");
         }
         user = await User.findByIdAndUpdate(req.params.id, { $set: newUser }, { new: true })
-        res.json({ note });
+        res.json({ user });
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Internal Server Error");

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const UserAdminSchema = new Schema({
     Firstname:{
@@ -29,8 +30,8 @@ const UserAdminSchema = new Schema({
     department:{
         type: String,
         required: true
-    },
-     { timestamps: true }
-  });
+    }
+  }     ,{timestamps: true }
+);
 
   module.exports = mongoose.model('useradmin', UserAdminSchema);

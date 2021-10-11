@@ -4,6 +4,13 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+var fetchuser = require('../middleware/fetchuser');
+
+
+
+
+
+
 
 const JWT_SECRET = 'P@rajL@ves$u$h';
 
@@ -13,7 +20,7 @@ const JWT_SECRET = 'P@rajL@ves$u$h';
 router.post('/creatuser',[
     
     body('email', 'Enter a valid email').isEmail(),
-    body('password', 'Password must be atleast 5 characters').isLength({ min: 5 }),
+    body('password', 'Password must be atleast 5 characters').isLength({ min: 6, max:12 }),
 ] , async(req, res)=>{ 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -94,7 +101,51 @@ router.post('/login', [
   
   
   })
+// ROUTE 3: Get loggedin User Details using: POST "/api/auth/getuser". Login required
+router.post('/getuser', fetchuser,async (req, res) => {
 
+    try {
+      userId = req.user.id;
+      
+      const user = await User.findById(userId).select("-password")
+      res.send(user)
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send("Internal Server Error");
+    }
+  })
   
+
+  // ROUTE 3: Update an existing Note using: PUT "/api/notes/updatenote". Login required
+router.put('/updateuser/:id', fetchuser, async (req, res) => {
+    const { Firstname,Middlename,Lastname,email,role,department } = req.body;
+    try {
+        // Create a newNote object
+        const newUser = {};
+        if (FirstName) { newUser.FirstName = FirstName };
+        if (MiddleName) { newUser.MiddleName = MiddleName };
+        if (LastName) { newUser.LastName = LastName };
+        if (email) { newUser.email = email };
+        if (role) { newUser.role = role };
+        if (department) { newUser.department = department };
+
+
+
+        
+        
+        // Find the note to be updated and update it
+        let user = await User.findById(req.user.id)
+        if (!user) { return res.status(404).send("Not Found") }
+
+        if (user.toString() !== req.user.id) {
+            return res.status(401).send("Not Allowed");
+        }
+        user = await User.findByIdAndUpdate(req.params.id, { $set: newUser }, { new: true })
+        res.json({ note });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+})
 
 module.exports = router
